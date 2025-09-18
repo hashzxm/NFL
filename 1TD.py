@@ -58,15 +58,17 @@ def fetch_data_with_r():
         }
         
         r_script = f"""
-        # FIX: Create a local directory to install R packages into
+        # Create a local directory to install R packages into
         dir.create("r_packages", showWarnings = FALSE)
-        # FIX: Add that directory to the list of paths R searches for packages
+        # Add that directory to the list of paths R searches for packages
         .libPaths("r_packages")
 
-        # Set the primary CRAN mirror for package installation
-        options(repos = c(CRAN = "https://cloud.r-project.org"))
+        # **
+        # ** FINAL FIX: Use a binary repository for faster, more reliable installation **
+        # **
+        options(repos = c(CRAN = "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"))
 
-        # FIX: Re-ordered and expanded the list to ensure dependencies install first.
+        # Re-ordered and expanded the list to ensure dependencies install first.
         packages <- c("openssl", "purrr", "tidyr", "httr", "dplyr", "arrow", "nflverse")
 
         # Loop through the packages. For each one, check if it's installed.
