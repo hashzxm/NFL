@@ -1,1 +1,2 @@
 r-base
+libcurl4-openssl-dev
