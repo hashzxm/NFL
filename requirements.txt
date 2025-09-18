@@ -5,6 +5,4 @@ xgboost
 scikit-learn
 plotly
 pyarrow
-requests
-gcsfs
-fsspec
+rpy2
