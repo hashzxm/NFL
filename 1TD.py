@@ -46,7 +46,7 @@ def fetch_data_with_r():
     """
     Executes an R script using rpy2 to download and cache nflverse data.
     """
-    st.info("Attempting to load data using the `nflverse` R package. This may take several minutes...")
+    st.info("Attempting to load data using the `nflverse` R package. This may take several minutes on the first run...")
     try:
         import rpy2.robjects as ro
         
@@ -57,9 +57,14 @@ def fetch_data_with_r():
             'depth': DEPTH_CHART_CACHE_PATH.replace('\\', '/')
         }
         
-        # *** THIS IS THE CORRECTED R SCRIPT ***
-        # It now includes a loop to install its own required R packages.
+        # *** THIS IS THE FINAL CORRECTED R SCRIPT ***
+        # It creates a local directory for packages to avoid permissions errors.
         r_script = f"""
+        # **FIX:** Create a local directory to install R packages into
+        dir.create("r_packages", showWarnings = FALSE)
+        # **FIX:** Add that directory to the list of paths R searches for packages
+        .libPaths("r_packages")
+
         # Set the primary CRAN mirror for package installation
         options(repos = c(CRAN = "https://cloud.r-project.org"))
 
@@ -67,14 +72,14 @@ def fetch_data_with_r():
         packages <- c("nflverse", "arrow", "dplyr")
 
         # Loop through the packages. For each one, check if it's installed.
-        # If not, install it. This is crucial for Streamlit Cloud.
+        # If not, install it into the local "r_packages" directory.
         for(p in packages) {{
             if (!require(p, character.only = TRUE)) {{
-                install.packages(p, dependencies=TRUE)
+                install.packages(p, dependencies = TRUE)
             }}
         }}
 
-        # Now that packages are installed, load them
+        # Now that packages are installed locally, load them
         library(nflverse)
         library(arrow)
         library(dplyr)
@@ -99,12 +104,7 @@ def fetch_data_with_r():
         st.success("R script executed and data cached successfully!")
         return True
     except Exception as e:
-        st.error(f"""
-        **Failed to fetch data using R.**
-        This app requires R and the `rpy2` Python library, along with the `nflverse` R package.
-        
-        **Error:** `{e}`
-        """)
+        st.error(f"Failed to fetch data using R. Error: {e}")
         return False
 
 @st.cache_data
@@ -247,16 +247,21 @@ class PredictionPipeline:
         return df
     
     def _calculate_player_usage(self):
-        # This re-uses the training engine's calculation method but applies it to the whole dataset
-        # In a real-world scenario, you might optimize this, but it's fine for this app.
-        engine = FeatureEngineeringEngine(self.all_data)
-        # We need the non-shifted version for the latest data point
-        usage = engine._calculate_player_usage().copy()
-        usage.sort_values(by=['player_id', 'season', 'week'], inplace=True)
-        grouped = usage.groupby('player_id')
-        usage['ewma_opp_share'] = grouped['opp_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
-        usage['ewma_rz_share'] = grouped['rz_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
-        return usage
+        pbp = self.all_data['pbp']
+        usage_plays = pbp[(pbp['play_type'].isin(['run', 'pass'])) & (pbp['rusher_player_id'].notna() | pbp['receiver_player_id'].notna())]
+        usage_df = pd.melt(usage_plays, id_vars=['game_id', 'season', 'week', 'posteam', 'yardline_100'], value_vars=['rusher_player_id', 'receiver_player_id'], value_name='player_id').dropna()
+        usage_df['is_touch'] = 1
+        usage_df['is_rz_touch'] = np.where(usage_df['yardline_100'] <= 20, 1, 0)
+        weekly_stats = usage_df.groupby(['player_id', 'game_id', 'season', 'week']).agg(touches=('is_touch', 'sum'), rz_touches=('is_rz_touch', 'sum')).reset_index()
+        team_totals = weekly_stats.groupby('game_id').agg(team_touches=('touches', 'sum'), team_rz_touches=('rz_touches', 'sum')).reset_index()
+        weekly_stats = weekly_stats.merge(team_totals, on='game_id')
+        weekly_stats['opp_share'] = weekly_stats['touches'] / weekly_stats['team_touches']
+        weekly_stats['rz_share'] = weekly_stats['rz_touches'] / weekly_stats['team_rz_touches']
+        weekly_stats.sort_values(by=['player_id', 'season', 'week'], inplace=True)
+        grouped = weekly_stats.groupby('player_id')
+        weekly_stats['ewma_opp_share'] = grouped['opp_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
+        weekly_stats['ewma_rz_share'] = grouped['rz_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
+        return weekly_stats
     
     def _calculate_defense_vulnerabilities(self):
         return FeatureEngineeringEngine(self.all_data)._calculate_defense_vulnerabilities()
@@ -349,7 +354,10 @@ def display_dashboard():
     past_games = current_season_schedule[pd.to_datetime(current_season_schedule['gameday']).dt.date < TODAY]
     default_week = 1 if past_games.empty else past_games['week'].max() + 1
     available_weeks = sorted(current_season_schedule['week'].unique())
-    if default_week not in available_weeks: default_week = available_weeks[0] if available_weeks else 1
+    if not available_weeks:
+        st.warning("No schedule data available for the current season.")
+        return
+    if default_week not in available_weeks: default_week = available_weeks[0]
 
     selected_week = st.selectbox("Select a week:", options=available_weeks, index=available_weeks.index(default_week))
 
