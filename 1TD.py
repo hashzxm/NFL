@@ -37,6 +37,7 @@ PBP_CACHE_PATH = os.path.join(DATA_DIR, "pbp_data.parquet")
 SCHEDULE_CACHE_PATH = os.path.join(DATA_DIR, "schedule_data.parquet")
 ROSTER_CACHE_PATH = os.path.join(DATA_DIR, "rosters_data.parquet")
 DEPTH_CHART_CACHE_PATH = os.path.join(DATA_DIR, "depth_charts.parquet")
+INJURIES_CACHE_PATH = os.path.join(DATA_DIR, "injuries_data.parquet") # --- NEW: Injuries cache path
 
 os.makedirs(DATA_DIR, exist_ok=True)
 
@@ -54,7 +55,8 @@ def fetch_data_with_r():
             'pbp': PBP_CACHE_PATH.replace('\\', '/'),
             'schedule': SCHEDULE_CACHE_PATH.replace('\\', '/'),
             'roster': ROSTER_CACHE_PATH.replace('\\', '/'),
-            'depth': DEPTH_CHART_CACHE_PATH.replace('\\', '/')
+            'depth': DEPTH_CHART_CACHE_PATH.replace('\\', '/'),
+            'injuries': INJURIES_CACHE_PATH.replace('\\', '/') # --- NEW: Injuries path for R
         }
         
         r_script = f"""
@@ -93,11 +95,13 @@ def fetch_data_with_r():
         schedule_data <- nflreadr::load_schedules(seasons = seasons_to_load)
         roster_data <- nflreadr::load_rosters(seasons = seasons_to_load)
         depth_chart_data <- nflreadr::load_depth_charts(seasons = seasons_to_load)
+        injuries_data <- nflreadr::load_injuries(seasons = seasons_to_load) # --- NEW: Load injuries data
 
         arrow::write_parquet(pbp_data, "{paths['pbp']}")
         arrow::write_parquet(schedule_data, "{paths['schedule']}")
         arrow::write_parquet(roster_data, "{paths['roster']}")
         arrow::write_parquet(depth_chart_data, "{paths['depth']}")
+        arrow::write_parquet(injuries_data, "{paths['injuries']}") # --- NEW: Save injuries data
         """
         
         with st.spinner("Executing R script to download nflverse data... This can take 5-10 minutes on the first run."):
@@ -112,7 +116,7 @@ def fetch_data_with_r():
 @st.cache_data
 def load_all_data():
     """Loads all necessary data from cached parquet files."""
-    cache_paths = [PBP_CACHE_PATH, SCHEDULE_CACHE_PATH, ROSTER_CACHE_PATH, DEPTH_CHART_CACHE_PATH]
+    cache_paths = [PBP_CACHE_PATH, SCHEDULE_CACHE_PATH, ROSTER_CACHE_PATH, DEPTH_CHART_CACHE_PATH, INJURIES_CACHE_PATH]
     if not all(os.path.exists(p) for p in cache_paths):
         if not fetch_data_with_r():
             return None
@@ -121,7 +125,8 @@ def load_all_data():
             "pbp": pd.read_parquet(PBP_CACHE_PATH),
             "schedule": pd.read_parquet(SCHEDULE_CACHE_PATH),
             "rosters": pd.read_parquet(ROSTER_CACHE_PATH),
-            "depth_charts": pd.read_parquet(DEPTH_CHART_CACHE_PATH)
+            "depth_charts": pd.read_parquet(DEPTH_CHART_CACHE_PATH),
+            "injuries": pd.read_parquet(INJURIES_CACHE_PATH) # --- NEW: Load injuries from cache
         }
         return data
     except Exception as e:
@@ -199,7 +204,7 @@ class FeatureEngineeringEngine:
         depth_charts = self.raw_data['depth_charts']
         depth_multipliers = {'RB1': 1.2, 'WR1': 1.15, 'TE1': 1.1, 'QB1': 1.05, 'RB2': 0.9, 'WR2': 1.0, 'TE2': 0.85}
         depth_charts['depth_multiplier'] = depth_charts['depth_team'].map(depth_multipliers).fillna(0.7)
-        return depth_charts[['season', 'week', 'team', 'gsis_id', 'depth_team', 'depth_multiplier']] # --- MODIFIED: Added depth_team
+        return depth_charts[['season', 'week', 'team', 'gsis_id', 'depth_team', 'depth_multiplier']] 
 
     def _merge_features(self, player_usage, defense_vuln, depth_charts):
         usage_to_merge = player_usage[['game_id', 'player_id', 'ewma_opp_share', 'ewma_rz_share']]
@@ -241,7 +246,7 @@ class PredictionPipeline:
     def _merge_prediction_features(self, base_df, latest_usage):
         df = pd.merge(base_df, latest_usage, left_on='gsis_id', right_on='player_id', how='left')
         latest_depths = self.depth_charts.sort_values('week').groupby('gsis_id').last().reset_index()
-        df = pd.merge(df, latest_depths[['gsis_id', 'depth_team', 'depth_multiplier']], on='gsis_id', how='left') # --- MODIFIED: Added depth_team
+        df = pd.merge(df, latest_depths[['gsis_id', 'depth_team', 'depth_multiplier']], on='gsis_id', how='left')
         df['depth_multiplier'].fillna(0.6, inplace=True)
         df['depth_team'].fillna('N/A', inplace=True)
         schedule = self.all_data['schedule'][['game_id', 'home_team', 'away_team']]
@@ -312,20 +317,28 @@ def run_training_process():
 
 # --- UI Helper & Display Functions ---
 @st.cache_data
-def get_defensive_ranks(defense_profiles):
-    """ --- NEW: Calculates defensive ranks for each position. --- """
-    if defense_profiles.empty:
+def get_team_redzone_tendencies(_pbp_data):
+    """ --- NEW: Calculates team play-calling tendencies in the red zone. --- """
+    rz_plays = _pbp_data[(_pbp_data['yardline_100'] <= 20) & (_pbp_data['play_type'].isin(['run', 'pass']))]
+    tendencies = rz_plays.groupby(['posteam', 'play_type']).size().unstack(fill_value=0)
+    tendencies['total_rz_plays'] = tendencies['pass'] + tendencies['run']
+    tendencies['pass_pct'] = tendencies['pass'] / tendencies['total_rz_plays']
+    tendencies['run_pct'] = tendencies['run'] / tendencies['total_rz_plays']
+    return tendencies[['pass_pct', 'run_pct']]
+
+@st.cache_data
+def get_defensive_ranks(_defense_profiles):
+    """ Calculates defensive ranks for each position. """
+    if _defense_profiles.empty:
         return pd.DataFrame()
     
-    # Calculate TDs allowed per game to normalize
     pbp_data = load_all_data()['pbp']
     games_played = pbp_data.groupby('defteam')['game_id'].nunique().reset_index(name='games_played')
     
-    defense_tds = defense_profiles.groupby(['defteam', 'position'])['count'].sum().reset_index()
+    defense_tds = _defense_profiles.groupby(['defteam', 'position'])['count'].sum().reset_index()
     defense_tds = pd.merge(defense_tds, games_played, on='defteam', how='left')
     defense_tds['tds_allowed_pg'] = defense_tds['count'] / defense_tds['games_played']
     
-    # Rank teams (higher rank is worse)
     defense_tds['rank'] = defense_tds.groupby('position')['tds_allowed_pg'].rank(method='dense', ascending=False)
     return defense_tds
 
@@ -371,12 +384,13 @@ def display_dashboard():
         
         defense_profiles = pipeline.defense_vuln_full
         defensive_ranks = get_defensive_ranks(defense_profiles)
+        team_rz_tendencies = get_team_redzone_tendencies(all_data['pbp'])
+        injuries = all_data['injuries']
 
         for _, game in games.iterrows():
             game_df = prediction_features_df[prediction_features_df['game_id'] == game['game_id']]
             st.markdown("---")
             
-            # --- MODIFIED: Added Vegas Odds to Game Header ---
             game_info = schedule[schedule['game_id'] == game['game_id']].iloc[0]
             spread = f"Spread: {game_info.get('spread_line', 'N/A')}"
             total = f"O/U: {game_info.get('total_line', 'N/A')}"
@@ -388,7 +402,6 @@ def display_dashboard():
                 st.markdown(f"**{spread}**")
             with header_cols[2]:
                 st.markdown(f"**{total}**")
-
 
             with st.expander("View Defensive Profiles"):
                 d_col1, d_col2 = st.columns(2)
@@ -425,21 +438,38 @@ def display_dashboard():
                     for _, player in top_players.iterrows():
                         with st.expander(f"{player['full_name']} ({player['position']}) - {player['probability']:.1f}%"):
                             
-                            # --- NEW: Enhanced Player Profile Section ---
                             st.markdown("##### Player Profile")
                             profile_cols = st.columns(4)
-                            
-                            # Defensive Rank
                             rank_info = defensive_ranks[(defensive_ranks['defteam'] == player['opponent']) & (defensive_ranks['position'] == player['position'])]
                             def_rank = int(rank_info['rank'].iloc[0]) if not rank_info.empty else 'N/A'
                             profile_cols[0].metric("Opponent Rank vs Pos", f"#{def_rank}")
-
-                            # Depth Chart
                             profile_cols[1].metric("Depth Chart", player.get('depth_team', 'N/A'))
-                            
-                            # Key Metrics
                             profile_cols[2].metric("Red Zone Share (EWMA)", f"{player.get('ewma_rz_share', 0):.1%}")
                             profile_cols[3].metric("Opp Share (EWMA)", f"{player.get('ewma_opp_share', 0):.1%}")
+
+                            # --- NEW: Matchup Analysis Section ---
+                            st.markdown("##### Matchup Analysis")
+                            analysis_cols = st.columns(2)
+                            
+                            with analysis_cols[0]:
+                                st.markdown("**Team Red Zone Tendency**")
+                                if team_name in team_rz_tendencies.index:
+                                    tendency = team_rz_tendencies.loc[team_name]
+                                    st.metric("Pass %", f"{tendency['pass_pct']:.1%}")
+                                    st.metric("Run %", f"{tendency['run_pct']:.1%}")
+                                else:
+                                    st.info("No RZ tendency data.")
+                            
+                            with analysis_cols[1]:
+                                st.markdown("**Key Injuries**")
+                                game_teams = [game['home_team'], game['away_team']]
+                                key_positions = ['QB', 'RB', 'WR', 'TE']
+                                game_injuries = injuries[(injuries['team'].isin(game_teams)) & (injuries['position'].isin(key_positions)) & (injuries['report_status'].isin(['Questionable', 'Out']))]
+                                if not game_injuries.empty:
+                                    for _, inj_player in game_injuries.iterrows():
+                                        st.text(f"- {inj_player['full_name']} ({inj_player['position']}, {inj_player['team']}): {inj_player['report_status']}")
+                                else:
+                                    st.text("No key offensive injuries.")
 
                             # --- EXISTING CHARTS & DATA ---
                             player_history = pipeline.player_usage[pipeline.player_usage['player_id'] == player['gsis_id']].sort_values(by=['season', 'week']).tail(8)
