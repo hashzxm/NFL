@@ -4,3 +4,4 @@ libsodium-dev
 libxml2-dev
 libssl-dev
 pkg-config
+libv8-dev
