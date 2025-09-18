@@ -63,13 +63,18 @@ def fetch_data_with_r():
         # Add that directory to the list of paths R searches for packages
         .libPaths("r_packages")
 
-        # **
-        # ** FINAL FIX: Use a binary repository for faster, more reliable installation **
-        # **
+        # Use a binary repository for faster, more reliable installation
         options(repos = c(CRAN = "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"))
 
-        # Re-ordered and expanded the list to ensure dependencies install first.
-        packages <- c("openssl", "purrr", "tidyr", "httr", "dplyr", "arrow", "nflverse")
+        # **
+        # ** FINAL FIX: Exhaustive, ordered list of all nflverse dependencies **
+        # **
+        packages <- c(
+            "openssl", "purrr", "scales", "magick", "ggplot2", "ggpath", "V8",
+            "httr", "tidyr", "dplyr", "janitor", "juicyjuice", "gt",
+            "nflreadr", "nflfastR", "nflseedR", "nfl4th", "nflplotR",
+            "arrow", "nflverse"
+        )
 
         # Loop through the packages. For each one, check if it's installed.
         # If not, install it into the local "r_packages" directory.
