@@ -31,7 +31,6 @@ CURRENT_SEASON = TODAY.year if TODAY.month > 6 else TODAY.year - 1
 EWMA_SPAN = 4
 
 # --- File Paths ---
-# These files MUST be in your GitHub repo now
 DATA_DIR = "nfl_data_cache"
 MODEL_PATH = os.path.join(DATA_DIR, "td_predictor_model.json")
 PBP_CACHE_PATH = os.path.join(DATA_DIR, "pbp_data.parquet")
@@ -39,10 +38,84 @@ SCHEDULE_CACHE_PATH = os.path.join(DATA_DIR, "schedule_data.parquet")
 ROSTER_CACHE_PATH = os.path.join(DATA_DIR, "rosters_data.parquet")
 DEPTH_CHART_CACHE_PATH = os.path.join(DATA_DIR, "depth_charts.parquet")
 
-# --- Simplified Data Loading ---
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# --- rpy2 Setup & Data Loading ---
+@st.cache_data(ttl=3600)
+def fetch_data_with_r():
+    """
+    Executes an R script using rpy2 to download and cache nflverse data.
+    """
+    st.info("Attempting to load data using the `nflverse` R package. This may take several minutes on the first run...")
+    try:
+        import rpy2.robjects as ro
+        
+        paths = {
+            'pbp': PBP_CACHE_PATH.replace('\\', '/'),
+            'schedule': SCHEDULE_CACHE_PATH.replace('\\', '/'),
+            'roster': ROSTER_CACHE_PATH.replace('\\', '/'),
+            'depth': DEPTH_CHART_CACHE_PATH.replace('\\', '/')
+        }
+        
+        r_script = f"""
+        # Create a local directory to install R packages into
+        dir.create("r_packages", showWarnings = FALSE)
+        # Add that directory to the list of paths R searches for packages
+        .libPaths("r_packages")
+
+        # Use a binary repository for faster, more reliable installation
+        options(repos = c(CRAN = "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"))
+
+        # Exhaustive, ordered list of all nflverse dependencies
+        packages <- c(
+            "openssl", "purrr", "scales", "magick", "ggplot2", "ggpath", "V8",
+            "httr", "tidyr", "dplyr", "janitor", "juicyjuice", "gt",
+            "nflreadr", "nflfastR", "nflseedR", "nfl4th", "nflplotR",
+            "arrow", "nflverse"
+        )
+
+        # Loop through the packages and install if missing
+        for(p in packages) {{
+            if (!require(p, character.only = TRUE)) {{
+                install.packages(p, dependencies = TRUE)
+            }}
+        }}
+
+        # Load the libraries
+        library(nflverse)
+        library(arrow)
+        library(dplyr)
+
+        # --- The rest of your data fetching logic ---
+        seasons_to_load <- c({', '.join(map(str, SEASONS))})
+
+        pbp_data <- nflreadr::load_pbp(seasons = seasons_to_load)
+        schedule_data <- nflreadr::load_schedules(seasons = seasons_to_load)
+        roster_data <- nflreadr::load_rosters(seasons = seasons_to_load)
+        depth_chart_data <- nflreadr::load_depth_charts(seasons = seasons_to_load)
+
+        arrow::write_parquet(pbp_data, "{paths['pbp']}")
+        arrow::write_parquet(schedule_data, "{paths['schedule']}")
+        arrow::write_parquet(roster_data, "{paths['roster']}")
+        arrow::write_parquet(depth_chart_data, "{paths['depth']}")
+        """
+        
+        with st.spinner("Executing R script to download nflverse data... This can take 5-10 minutes on the first run."):
+            ro.r(r_script)
+        
+        st.success("R script executed and data cached successfully!")
+        return True
+    except Exception as e:
+        st.error(f"Failed to fetch data using R. Error: {e}")
+        return False
+
 @st.cache_data
 def load_all_data():
-    """Loads all necessary data from the parquet files in the repo."""
+    """Loads all necessary data from cached parquet files."""
+    cache_paths = [PBP_CACHE_PATH, SCHEDULE_CACHE_PATH, ROSTER_CACHE_PATH, DEPTH_CHART_CACHE_PATH]
+    if not all(os.path.exists(p) for p in cache_paths):
+        if not fetch_data_with_r():
+            return None
     try:
         data = {
             "pbp": pd.read_parquet(PBP_CACHE_PATH),
@@ -52,12 +125,12 @@ def load_all_data():
         }
         return data
     except Exception as e:
-        st.error(f"Failed to read data files from the repository. Make sure the .parquet files are there. Error: {e}")
+        st.error(f"Failed to read from cache. Error: {e}")
         return None
 
-# --- Feature Engineering & Prediction Logic (This code does not need to change) ---
+# --- Feature Engineering & Prediction Logic (from original scripts) ---
 class FeatureEngineeringEngine:
-    # ... (paste the entire FeatureEngineeringEngine class here, unchanged)
+    """Consolidates all feature engineering steps for model training."""
     def __init__(self, all_data):
         self.raw_data = all_data
         self.features_df = None
@@ -140,7 +213,6 @@ class FeatureEngineeringEngine:
         self.features_df['def_vuln_rate'].fillna(self.features_df['def_vuln_rate'].mean(), inplace=True)
 
 class PredictionPipeline:
-    # ... (paste the entire PredictionPipeline class here, unchanged)
     def __init__(self, all_data, week, season):
         self.all_data = all_data
         self.week = week
@@ -202,7 +274,6 @@ class PredictionPipeline:
 
 # --- Model Training Function ---
 def run_training_process():
-    # ... (paste the entire run_training_process function here, unchanged)
     status_placeholder = st.empty()
     with st.spinner("Loading base data..."):
         all_data = load_all_data()
@@ -253,7 +324,6 @@ def run_training_process():
 
 # --- UI Helper & Display Functions ---
 def generate_justification(player_row):
-    # ... (paste the entire generate_justification function here, unchanged)
     justifications = []
     rz_share = player_row['ewma_rz_share']
     if rz_share > 0.35: justifications.append(f"**Elite Red Zone Usage** ({rz_share:.1%})")
@@ -270,13 +340,11 @@ def generate_justification(player_row):
 
 @st.cache_resource
 def get_model():
-    # ... (paste the entire get_model function here, unchanged)
     model = xgb.XGBClassifier()
     model.load_model(MODEL_PATH)
     return model
 
 def display_dashboard():
-    # ... (paste the entire display_dashboard function here, unchanged)
     st.title("🏈 First Touchdown Scorer Predictions")
     all_data = load_all_data()
     if not all_data:
@@ -342,7 +410,6 @@ def display_dashboard():
                                 st.plotly_chart(fig_trends, use_container_width=True)
 
 def display_model_management():
-    # ... (paste the entire display_model_management function here, unchanged)
     st.title("🎛️ Model Management")
     st.subheader("Current Model Information")
     if os.path.exists(MODEL_PATH):
@@ -359,7 +426,6 @@ def display_model_management():
 
 # --- Main Application Logic ---
 def main():
-    # ... (paste the entire main function here, unchanged)
     st.sidebar.title("Navigation")
     page = st.sidebar.radio("Go to", ["Prediction Dashboard", "Model Management"])
     if not os.path.exists(MODEL_PATH) and page != "Model Management":
