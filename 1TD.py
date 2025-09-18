@@ -408,9 +408,30 @@ def display_dashboard():
                                 fig_trends.add_trace(go.Scatter(x=player_history['week_label'], y=player_history['ewma_opp_share'], mode='lines+markers', name='Opportunity Share (EWMA)'))
                                 fig_trends.update_layout(title="Recent Usage Trend", xaxis_title="Game Week", yaxis_title="Share %", height=300, margin=dict(l=20, r=20, t=40, b=20), legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
                                 st.plotly_chart(fig_trends, use_container_width=True)
+                                
+                                # --- THIS IS THE CORRECTED/ADDED BLOCK ---
+                                st.markdown("##### Recent Game Log")
+                                table_data = player_history[['week', 'touches', 'rz_touches', 'opp_share', 'rz_share']].copy()
+                                table_data.rename(columns={
+                                    'week': 'Week',
+                                    'touches': 'Touches',
+                                    'rz_touches': 'RZ Touches',
+                                    'opp_share': 'Opp. Share',
+                                    'rz_share': 'RZ Share'
+                                }, inplace=True)
+                                st.dataframe(
+                                    table_data.style.format({
+                                        "Opp. Share": "{:.3f}",
+                                        "RZ Share": "{:.3f}"
+                                    }),
+                                    use_container_width=True,
+                                    hide_index=True
+                                )
+                                # --- END OF CORRECTED/ADDED BLOCK ---
+
 
 def display_model_management():
-    st.title("🎛️ Model Management")
+    st.title("📑 Model Management")
     st.subheader("Current Model Information")
     if os.path.exists(MODEL_PATH):
         model_date = datetime.datetime.fromtimestamp(os.path.getmtime(MODEL_PATH))
