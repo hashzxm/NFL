@@ -1,0 +1,33 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Node.js dependencies (very important to ignore)
+node_modules/
+
+# Local Data Folders (that you don't want in the repo)
+nfl_data/
+
+# Sensitive Files (NEVER commit these)
+serviceAccountKey.json
+
+# Ignore all contents of the cache directory...
+nfl_data_cache/*
+
+# ... EXCEPT for the essential data and model files your app needs.
+!nfl_data_cache/*.parquet
+!nfl_data_cache/td_predictor_model.json
+
+# Misc files from your list
+app.py
+nfl_data.py
+nfl_gamelogs.py
+nfl_model.py
+nfl_upload.js
+nflplan.py
+predict.py
+predictions_week_3_2025.txt
+tonTD.py
+update_data.R
+package.json
+package-lock.json

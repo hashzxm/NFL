@@ -1,0 +1,227 @@
+================================================================================
+🏈 ML-Powered NFL First TD Scorer Predictions for Week 3 🏈
+================================================================================
+
+--- Matchup: ARI @ SF ---
+
+  Predictions for ARI:
+    James Conner              RB    14.6%
+    Michael Wilson            WR    11.1%
+    Michael Carter            RB    10.8%
+
+  Predictions for SF:
+    George Kittle             TE    9.5%
+    Christian McCaffrey       RB    8.7%
+    Luke Farrell              TE    8.4%
+
+------------------------------------------------------------
+
+--- Matchup: ATL @ CAR ---
+
+  Predictions for ATL:
+    Bijan Robinson            RB    18.8%
+    Drake London              WR    14.4%
+    Ray-Ray McCloud           WR    13.6%
+
+  Predictions for CAR:
+    Tetairoa McMillan         WR    9.6%
+    Xavier Legette            WR    9.6%
+    Hunter Renfrow            WR    9.2%
+
+------------------------------------------------------------
+
+--- Matchup: CIN @ MIN ---
+
+  Predictions for CIN:
+    Chase Brown               RB    16.3%
+    Tee Higgins               WR    15.5%
+    Ja'Marr Chase             WR    12.7%
+
+  Predictions for MIN:
+    Justin Jefferson          WR    14.8%
+    Jordan Mason              RB    14.4%
+    Aaron Jones               RB    14.2%
+
+------------------------------------------------------------
+
+--- Matchup: DAL @ CHI ---
+
+  Predictions for DAL:
+    KaVontae Turpin           WR    13.2%
+    Javonte Williams          RB    13.0%
+    CeeDee Lamb               WR    11.5%
+
+  Predictions for CHI:
+    Caleb Williams            QB    17.3%
+    DJ Moore                  WR    13.5%
+    Olamide Zaccheaus         WR    10.8%
+
+------------------------------------------------------------
+
+--- Matchup: DEN @ LAC ---
+
+  Predictions for DEN:
+    Marvin Mims Jr.           WR    13.2%
+    Bo Nix                    QB    13.2%
+    Troy Franklin             WR    12.0%
+
+  Predictions for LAC:
+    Omarion Hampton           RB    12.2%
+    Najee Harris              RB    11.0%
+    Kimani Vidal              RB    10.1%
+
+------------------------------------------------------------
+
+--- Matchup: DET @ BAL ---
+
+  Predictions for DET:
+    Amon-Ra St. Brown         WR    16.5%
+    Jameson Williams          WR    12.4%
+    David Montgomery          RB    12.2%
+
+  Predictions for BAL:
+    Derrick Henry             RB    13.1%
+    Keaton Mitchell           RB    11.5%
+    Mark Andrews              TE    11.3%
+
+------------------------------------------------------------
+
+--- Matchup: GB @ CLE ---
+
+  Predictions for GB:
+    Romeo Doubs               WR    11.9%
+    Christian Watson          WR    11.9%
+    Josh Jacobs               RB    10.0%
+
+  Predictions for CLE:
+    Dylan Sampson             RB    13.4%
+    Cedric Tillman            WR    13.0%
+    Jerome Ford               RB    11.1%
+
+------------------------------------------------------------
+
+--- Matchup: HOU @ JAX ---
+
+  Predictions for HOU:
+    Joe Mixon                 RB    10.4%
+    Tank Dell                 WR    9.3%
+    Nico Collins              WR    9.2%
+
+  Predictions for JAX:
+    Travis Hunter             WR    12.7%
+    Dyami Brown               WR    11.8%
+    Travis Etienne            RB    10.0%
+
+------------------------------------------------------------
+
+--- Matchup: IND @ TEN ---
+
+  Predictions for IND:
+    Daniel Jones              QB    15.1%
+    Anthony Richardson        QB    12.4%
+    Jonathan Taylor           RB    12.3%
+
+  Predictions for TEN:
+    Tony Pollard              RB    12.0%
+    Elic Ayomanor             WR    11.3%
+    Jordan Mims               RB    9.7%
+
+------------------------------------------------------------
+
+--- Matchup: KC @ NYG ---
+
+  Predictions for KC:
+    Isiah Pacheco             RB    11.1%
+    Rashee Rice               WR    11.0%
+    Kareem Hunt               RB    10.3%
+
+  Predictions for NYG:
+    Russell Wilson            QB    15.1%
+    Jalin Hyatt               WR    10.6%
+    Malik Nabers              WR    10.1%
+
+------------------------------------------------------------
+
+--- Matchup: LA @ PHI ---
+
+  Predictions for LA:
+    Puka Nacua                WR    15.5%
+    Ronnie Rivers             RB    11.1%
+    Xavier Smith              WR    10.4%
+
+  Predictions for PHI:
+    Saquon Barkley            RB    11.0%
+    Audric Estimé             RB    8.4%
+    Dorian Thompson-Robinson  QB    7.8%
+
+------------------------------------------------------------
+
+--- Matchup: LV @ WAS ---
+
+  Predictions for LV:
+    Ashton Jeanty             RB    19.2%
+    Jakobi Meyers             WR    12.4%
+    Chris Collier             RB    9.3%
+
+  Predictions for WAS:
+    Deebo Samuel Sr.          WR    10.4%
+    Zach Ertz                 TE    9.6%
+    Jacory Croskey-Merritt    RB    9.0%
+
+------------------------------------------------------------
+
+--- Matchup: MIA @ BUF ---
+
+  Predictions for MIA:
+    Alexander Mattison        RB    12.8%
+    Jaylen Waddle             WR    10.5%
+    De'Von Achane             RB    9.9%
+
+  Predictions for BUF:
+    James Cook                RB    12.8%
+    Khalil Shakir             WR    10.6%
+    Ty Johnson                RB    8.9%
+
+------------------------------------------------------------
+
+--- Matchup: NO @ SEA ---
+
+  Predictions for NO:
+    Chris Olave               WR    9.3%
+    Rashid Shaheed            WR    8.9%
+    Juwan Johnson             TE    8.6%
+
+  Predictions for SEA:
+    Kenneth Walker III        RB    24.7%
+    Zach Charbonnet           RB    21.3%
+    Jake Bobo                 WR    11.0%
+
+------------------------------------------------------------
+
+--- Matchup: NYJ @ TB ---
+
+  Predictions for NYJ:
+    Garrett Wilson            WR    14.8%
+    Justin Fields             QB    14.2%
+    Allen Lazard              WR    11.6%
+
+  Predictions for TB:
+    Bucky Irving              RB    11.1%
+    Mike Evans                WR    11.0%
+    Chris Godwin Jr.          WR    10.8%
+
+------------------------------------------------------------
+
+--- Matchup: PIT @ NE ---
+
+  Predictions for PIT:
+    DK Metcalf                WR    14.9%
+    Jonnu Smith               TE    12.0%
+    Jaylen Warren             RB    11.9%
+
+  Predictions for NE:
+    Stefon Diggs              WR    11.9%
+    Terrell Jennings          RB    11.7%
+    TreVeyon Henderson        RB    11.5%
+
+------------------------------------------------------------

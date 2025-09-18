@@ -4,4 +4,4 @@ numpy
 xgboost
 scikit-learn
 plotly
-rpy2
+pyarrow

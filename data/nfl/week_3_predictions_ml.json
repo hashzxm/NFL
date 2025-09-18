@@ -1,0 +1,642 @@
+[
+    {
+        "home_team": "SF",
+        "away_team": "ARI",
+        "predictions": {
+            "ARI": [
+                {
+                    "full_name": "James Conner",
+                    "position": "RB",
+                    "probability": 14.59000015258789
+                },
+                {
+                    "full_name": "Michael Wilson",
+                    "position": "WR",
+                    "probability": 11.100000381469727
+                },
+                {
+                    "full_name": "Michael Carter",
+                    "position": "RB",
+                    "probability": 10.800000190734863
+                }
+            ],
+            "SF": [
+                {
+                    "full_name": "George Kittle",
+                    "position": "TE",
+                    "probability": 9.489999771118164
+                },
+                {
+                    "full_name": "Christian McCaffrey",
+                    "position": "RB",
+                    "probability": 8.75
+                },
+                {
+                    "full_name": "Luke Farrell",
+                    "position": "TE",
+                    "probability": 8.399999618530273
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "CAR",
+        "away_team": "ATL",
+        "predictions": {
+            "ATL": [
+                {
+                    "full_name": "Bijan Robinson",
+                    "position": "RB",
+                    "probability": 18.81999969482422
+                },
+                {
+                    "full_name": "Drake London",
+                    "position": "WR",
+                    "probability": 14.399999618530273
+                },
+                {
+                    "full_name": "Ray-Ray McCloud",
+                    "position": "WR",
+                    "probability": 13.5600004196167
+                }
+            ],
+            "CAR": [
+                {
+                    "full_name": "Tetairoa McMillan",
+                    "position": "WR",
+                    "probability": 9.619999885559082
+                },
+                {
+                    "full_name": "Xavier Legette",
+                    "position": "WR",
+                    "probability": 9.579999923706055
+                },
+                {
+                    "full_name": "Hunter Renfrow",
+                    "position": "WR",
+                    "probability": 9.199999809265137
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "MIN",
+        "away_team": "CIN",
+        "predictions": {
+            "CIN": [
+                {
+                    "full_name": "Chase Brown",
+                    "position": "RB",
+                    "probability": 16.34000015258789
+                },
+                {
+                    "full_name": "Tee Higgins",
+                    "position": "WR",
+                    "probability": 15.5
+                },
+                {
+                    "full_name": "Ja'Marr Chase",
+                    "position": "WR",
+                    "probability": 12.75
+                }
+            ],
+            "MIN": [
+                {
+                    "full_name": "Justin Jefferson",
+                    "position": "WR",
+                    "probability": 14.779999732971191
+                },
+                {
+                    "full_name": "Jordan Mason",
+                    "position": "RB",
+                    "probability": 14.4399995803833
+                },
+                {
+                    "full_name": "Aaron Jones",
+                    "position": "RB",
+                    "probability": 14.199999809265137
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "CHI",
+        "away_team": "DAL",
+        "predictions": {
+            "CHI": [
+                {
+                    "full_name": "Caleb Williams",
+                    "position": "QB",
+                    "probability": 17.34000015258789
+                },
+                {
+                    "full_name": "DJ Moore",
+                    "position": "WR",
+                    "probability": 13.460000038146973
+                },
+                {
+                    "full_name": "Olamide Zaccheaus",
+                    "position": "WR",
+                    "probability": 10.800000190734863
+                }
+            ],
+            "DAL": [
+                {
+                    "full_name": "KaVontae Turpin",
+                    "position": "WR",
+                    "probability": 13.239999771118164
+                },
+                {
+                    "full_name": "Javonte Williams",
+                    "position": "RB",
+                    "probability": 12.960000038146973
+                },
+                {
+                    "full_name": "CeeDee Lamb",
+                    "position": "WR",
+                    "probability": 11.479999542236328
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "LAC",
+        "away_team": "DEN",
+        "predictions": {
+            "DEN": [
+                {
+                    "full_name": "Marvin Mims Jr.",
+                    "position": "WR",
+                    "probability": 13.220000267028809
+                },
+                {
+                    "full_name": "Bo Nix",
+                    "position": "QB",
+                    "probability": 13.220000267028809
+                },
+                {
+                    "full_name": "Troy Franklin",
+                    "position": "WR",
+                    "probability": 12.0
+                }
+            ],
+            "LAC": [
+                {
+                    "full_name": "Omarion Hampton",
+                    "position": "RB",
+                    "probability": 12.170000076293945
+                },
+                {
+                    "full_name": "Najee Harris",
+                    "position": "RB",
+                    "probability": 11.0
+                },
+                {
+                    "full_name": "Kimani Vidal",
+                    "position": "RB",
+                    "probability": 10.119999885559082
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "BAL",
+        "away_team": "DET",
+        "predictions": {
+            "BAL": [
+                {
+                    "full_name": "Derrick Henry",
+                    "position": "RB",
+                    "probability": 13.149999618530273
+                },
+                {
+                    "full_name": "Keaton Mitchell",
+                    "position": "RB",
+                    "probability": 11.460000038146973
+                },
+                {
+                    "full_name": "Mark Andrews",
+                    "position": "TE",
+                    "probability": 11.350000381469727
+                }
+            ],
+            "DET": [
+                {
+                    "full_name": "Amon-Ra St. Brown",
+                    "position": "WR",
+                    "probability": 16.479999542236328
+                },
+                {
+                    "full_name": "Jameson Williams",
+                    "position": "WR",
+                    "probability": 12.449999809265137
+                },
+                {
+                    "full_name": "David Montgomery",
+                    "position": "RB",
+                    "probability": 12.229999542236328
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "CLE",
+        "away_team": "GB",
+        "predictions": {
+            "CLE": [
+                {
+                    "full_name": "Dylan Sampson",
+                    "position": "RB",
+                    "probability": 13.359999656677246
+                },
+                {
+                    "full_name": "Cedric Tillman",
+                    "position": "WR",
+                    "probability": 13.020000457763672
+                },
+                {
+                    "full_name": "Jerome Ford",
+                    "position": "RB",
+                    "probability": 11.100000381469727
+                }
+            ],
+            "GB": [
+                {
+                    "full_name": "Romeo Doubs",
+                    "position": "WR",
+                    "probability": 11.869999885559082
+                },
+                {
+                    "full_name": "Christian Watson",
+                    "position": "WR",
+                    "probability": 11.869999885559082
+                },
+                {
+                    "full_name": "Josh Jacobs",
+                    "position": "RB",
+                    "probability": 9.979999542236328
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "JAX",
+        "away_team": "HOU",
+        "predictions": {
+            "HOU": [
+                {
+                    "full_name": "Joe Mixon",
+                    "position": "RB",
+                    "probability": 10.390000343322754
+                },
+                {
+                    "full_name": "Tank Dell",
+                    "position": "WR",
+                    "probability": 9.260000228881836
+                },
+                {
+                    "full_name": "Nico Collins",
+                    "position": "WR",
+                    "probability": 9.199999809265137
+                }
+            ],
+            "JAX": [
+                {
+                    "full_name": "Travis Hunter",
+                    "position": "WR",
+                    "probability": 12.680000305175781
+                },
+                {
+                    "full_name": "Dyami Brown",
+                    "position": "WR",
+                    "probability": 11.779999732971191
+                },
+                {
+                    "full_name": "Travis Etienne",
+                    "position": "RB",
+                    "probability": 10.0
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "TEN",
+        "away_team": "IND",
+        "predictions": {
+            "IND": [
+                {
+                    "full_name": "Daniel Jones",
+                    "position": "QB",
+                    "probability": 15.119999885559082
+                },
+                {
+                    "full_name": "Anthony Richardson",
+                    "position": "QB",
+                    "probability": 12.390000343322754
+                },
+                {
+                    "full_name": "Jonathan Taylor",
+                    "position": "RB",
+                    "probability": 12.350000381469727
+                }
+            ],
+            "TEN": [
+                {
+                    "full_name": "Tony Pollard",
+                    "position": "RB",
+                    "probability": 11.970000267028809
+                },
+                {
+                    "full_name": "Elic Ayomanor",
+                    "position": "WR",
+                    "probability": 11.270000457763672
+                },
+                {
+                    "full_name": "Jordan Mims",
+                    "position": "RB",
+                    "probability": 9.6899995803833
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "NYG",
+        "away_team": "KC",
+        "predictions": {
+            "KC": [
+                {
+                    "full_name": "Isiah Pacheco",
+                    "position": "RB",
+                    "probability": 11.0600004196167
+                },
+                {
+                    "full_name": "Rashee Rice",
+                    "position": "WR",
+                    "probability": 11.020000457763672
+                },
+                {
+                    "full_name": "Kareem Hunt",
+                    "position": "RB",
+                    "probability": 10.3100004196167
+                }
+            ],
+            "NYG": [
+                {
+                    "full_name": "Russell Wilson",
+                    "position": "QB",
+                    "probability": 15.069999694824219
+                },
+                {
+                    "full_name": "Jalin Hyatt",
+                    "position": "WR",
+                    "probability": 10.569999694824219
+                },
+                {
+                    "full_name": "Malik Nabers",
+                    "position": "WR",
+                    "probability": 10.069999694824219
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "PHI",
+        "away_team": "LA",
+        "predictions": {
+            "LA": [
+                {
+                    "full_name": "Puka Nacua",
+                    "position": "WR",
+                    "probability": 15.520000457763672
+                },
+                {
+                    "full_name": "Ronnie Rivers",
+                    "position": "RB",
+                    "probability": 11.109999656677246
+                },
+                {
+                    "full_name": "Xavier Smith",
+                    "position": "WR",
+                    "probability": 10.449999809265137
+                }
+            ],
+            "PHI": [
+                {
+                    "full_name": "Saquon Barkley",
+                    "position": "RB",
+                    "probability": 10.960000038146973
+                },
+                {
+                    "full_name": "Audric Estim\u00e9",
+                    "position": "RB",
+                    "probability": 8.390000343322754
+                },
+                {
+                    "full_name": "Dorian Thompson-Robinson",
+                    "position": "QB",
+                    "probability": 7.809999942779541
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "WAS",
+        "away_team": "LV",
+        "predictions": {
+            "LV": [
+                {
+                    "full_name": "Ashton Jeanty",
+                    "position": "RB",
+                    "probability": 19.25
+                },
+                {
+                    "full_name": "Jakobi Meyers",
+                    "position": "WR",
+                    "probability": 12.390000343322754
+                },
+                {
+                    "full_name": "Chris Collier",
+                    "position": "RB",
+                    "probability": 9.329999923706055
+                }
+            ],
+            "WAS": [
+                {
+                    "full_name": "Deebo Samuel Sr.",
+                    "position": "WR",
+                    "probability": 10.380000114440918
+                },
+                {
+                    "full_name": "Zach Ertz",
+                    "position": "TE",
+                    "probability": 9.630000114440918
+                },
+                {
+                    "full_name": "Jacory Croskey-Merritt",
+                    "position": "RB",
+                    "probability": 9.010000228881836
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "BUF",
+        "away_team": "MIA",
+        "predictions": {
+            "BUF": [
+                {
+                    "full_name": "James Cook",
+                    "position": "RB",
+                    "probability": 12.760000228881836
+                },
+                {
+                    "full_name": "Khalil Shakir",
+                    "position": "WR",
+                    "probability": 10.5600004196167
+                },
+                {
+                    "full_name": "Ty Johnson",
+                    "position": "RB",
+                    "probability": 8.930000305175781
+                }
+            ],
+            "MIA": [
+                {
+                    "full_name": "Alexander Mattison",
+                    "position": "RB",
+                    "probability": 12.760000228881836
+                },
+                {
+                    "full_name": "Jaylen Waddle",
+                    "position": "WR",
+                    "probability": 10.479999542236328
+                },
+                {
+                    "full_name": "De'Von Achane",
+                    "position": "RB",
+                    "probability": 9.9399995803833
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "SEA",
+        "away_team": "NO",
+        "predictions": {
+            "NO": [
+                {
+                    "full_name": "Chris Olave",
+                    "position": "WR",
+                    "probability": 9.300000190734863
+                },
+                {
+                    "full_name": "Rashid Shaheed",
+                    "position": "WR",
+                    "probability": 8.899999618530273
+                },
+                {
+                    "full_name": "Juwan Johnson",
+                    "position": "TE",
+                    "probability": 8.640000343322754
+                }
+            ],
+            "SEA": [
+                {
+                    "full_name": "Kenneth Walker III",
+                    "position": "RB",
+                    "probability": 24.690000534057617
+                },
+                {
+                    "full_name": "Zach Charbonnet",
+                    "position": "RB",
+                    "probability": 21.350000381469727
+                },
+                {
+                    "full_name": "Jake Bobo",
+                    "position": "WR",
+                    "probability": 10.949999809265137
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "TB",
+        "away_team": "NYJ",
+        "predictions": {
+            "NYJ": [
+                {
+                    "full_name": "Garrett Wilson",
+                    "position": "WR",
+                    "probability": 14.770000457763672
+                },
+                {
+                    "full_name": "Justin Fields",
+                    "position": "QB",
+                    "probability": 14.229999542236328
+                },
+                {
+                    "full_name": "Allen Lazard",
+                    "position": "WR",
+                    "probability": 11.609999656677246
+                }
+            ],
+            "TB": [
+                {
+                    "full_name": "Bucky Irving",
+                    "position": "RB",
+                    "probability": 11.069999694824219
+                },
+                {
+                    "full_name": "Mike Evans",
+                    "position": "WR",
+                    "probability": 10.960000038146973
+                },
+                {
+                    "full_name": "Chris Godwin Jr.",
+                    "position": "WR",
+                    "probability": 10.779999732971191
+                }
+            ]
+        }
+    },
+    {
+        "home_team": "NE",
+        "away_team": "PIT",
+        "predictions": {
+            "NE": [
+                {
+                    "full_name": "Stefon Diggs",
+                    "position": "WR",
+                    "probability": 11.949999809265137
+                },
+                {
+                    "full_name": "Terrell Jennings",
+                    "position": "RB",
+                    "probability": 11.670000076293945
+                },
+                {
+                    "full_name": "TreVeyon Henderson",
+                    "position": "RB",
+                    "probability": 11.539999961853027
+                }
+            ],
+            "PIT": [
+                {
+                    "full_name": "DK Metcalf",
+                    "position": "WR",
+                    "probability": 14.9399995803833
+                },
+                {
+                    "full_name": "Jonnu Smith",
+                    "position": "TE",
+                    "probability": 11.979999542236328
+                },
+                {
+                    "full_name": "Jaylen Warren",
+                    "position": "RB",
+                    "probability": 11.949999809265137
+                }
+            ]
+        }
+    }
+]
