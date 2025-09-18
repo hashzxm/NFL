@@ -57,19 +57,17 @@ def fetch_data_with_r():
             'depth': DEPTH_CHART_CACHE_PATH.replace('\\', '/')
         }
         
-        # *** THIS IS THE FINAL CORRECTED R SCRIPT ***
-        # It creates a local directory for packages to avoid permissions errors.
         r_script = f"""
-        # **FIX:** Create a local directory to install R packages into
+        # FIX: Create a local directory to install R packages into
         dir.create("r_packages", showWarnings = FALSE)
-        # **FIX:** Add that directory to the list of paths R searches for packages
+        # FIX: Add that directory to the list of paths R searches for packages
         .libPaths("r_packages")
 
         # Set the primary CRAN mirror for package installation
         options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-        # List of the R packages your script needs
-        packages <- c("nflverse", "arrow", "dplyr")
+        # FIX: Expanded the list to include key dependencies that were failing
+        packages <- c("nflverse", "arrow", "dplyr", "tidyr", "purrr", "httr")
 
         # Loop through the packages. For each one, check if it's installed.
         # If not, install it into the local "r_packages" directory.
@@ -126,8 +124,9 @@ def load_all_data():
         st.error(f"Failed to read from cache. Error: {e}")
         return None
 
-# --- Feature Engineering & Prediction Logic ---
+# --- Feature Engineering & Prediction Logic (from original scripts) ---
 class FeatureEngineeringEngine:
+    """Consolidates all feature engineering steps for model training."""
     def __init__(self, all_data):
         self.raw_data = all_data
         self.features_df = None
