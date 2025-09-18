@@ -66,9 +66,7 @@ def fetch_data_with_r():
         # Use a binary repository for faster, more reliable installation
         options(repos = c(CRAN = "https://packagemanager.rstudio.com/cran/__linux__/jammy/latest"))
 
-        # **
-        # ** FINAL FIX: Exhaustive, ordered list of all nflverse dependencies **
-        # **
+        # Exhaustive, ordered list of all nflverse dependencies
         packages <- c(
             "openssl", "purrr", "scales", "magick", "ggplot2", "ggpath", "V8",
             "httr", "tidyr", "dplyr", "janitor", "juicyjuice", "gt",
@@ -76,15 +74,14 @@ def fetch_data_with_r():
             "arrow", "nflverse"
         )
 
-        # Loop through the packages. For each one, check if it's installed.
-        # If not, install it into the local "r_packages" directory.
+        # Loop through the packages and install if missing
         for(p in packages) {{
             if (!require(p, character.only = TRUE)) {{
                 install.packages(p, dependencies = TRUE)
             }}
         }}
 
-        # Now that packages are installed locally, load them
+        # Load the libraries
         library(nflverse)
         library(arrow)
         library(dplyr)
