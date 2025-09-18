@@ -5,3 +5,6 @@ libxml2-dev
 libssl-dev
 pkg-config
 libv8-dev
+libmagick++-dev
+libfontconfig1-dev
+libcairo2-dev
