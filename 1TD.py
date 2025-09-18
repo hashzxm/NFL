@@ -66,8 +66,8 @@ def fetch_data_with_r():
         # Set the primary CRAN mirror for package installation
         options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-        # FIX: Expanded the list to include key dependencies that were failing
-        packages <- c("nflverse", "arrow", "dplyr", "tidyr", "purrr", "httr")
+        # FIX: Re-ordered and expanded the list to ensure dependencies install first.
+        packages <- c("openssl", "purrr", "tidyr", "httr", "dplyr", "arrow", "nflverse")
 
         # Loop through the packages. For each one, check if it's installed.
         # If not, install it into the local "r_packages" directory.
