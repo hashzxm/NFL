@@ -193,13 +193,13 @@ class FeatureEngineeringEngine:
         total = td_plays.groupby('defteam').size().reset_index(name='total')
         vuln = by_pos.merge(total, on='defteam')
         vuln['def_vuln_rate'] = vuln['count'] / vuln['total']
-        return vuln[['defteam', 'position', 'def_vuln_rate']]
+        return vuln # Return the full dataframe for charting
 
     def _process_depth_charts(self):
         depth_charts = self.raw_data['depth_charts']
         depth_multipliers = {'RB1': 1.2, 'WR1': 1.15, 'TE1': 1.1, 'QB1': 1.05, 'RB2': 0.9, 'WR2': 1.0, 'TE2': 0.85}
         depth_charts['depth_multiplier'] = depth_charts['depth_team'].map(depth_multipliers).fillna(0.7)
-        return depth_charts[['season', 'week', 'team', 'gsis_id', 'depth_multiplier']]
+        return depth_charts[['season', 'week', 'team', 'gsis_id', 'depth_team', 'depth_multiplier']] # --- MODIFIED: Added depth_team
 
     def _merge_features(self, player_usage, defense_vuln, depth_charts):
         usage_to_merge = player_usage[['game_id', 'player_id', 'ewma_opp_share', 'ewma_rz_share']]
@@ -209,7 +209,7 @@ class FeatureEngineeringEngine:
         schedule = self.raw_data['schedule'][['game_id', 'home_team', 'away_team']]
         self.features_df = self.features_df.merge(schedule, on='game_id')
         self.features_df['opponent'] = np.where(self.features_df['team'] == self.features_df['home_team'], self.features_df['away_team'], self.features_df['home_team'])
-        self.features_df = pd.merge(self.features_df, defense_vuln, left_on=['opponent', 'position'], right_on=['defteam', 'position'], how='left')
+        self.features_df = pd.merge(self.features_df, defense_vuln[['defteam', 'position', 'def_vuln_rate']], left_on=['opponent', 'position'], right_on=['defteam', 'position'], how='left')
         self.features_df['def_vuln_rate'].fillna(self.features_df['def_vuln_rate'].mean(), inplace=True)
 
 class PredictionPipeline:
@@ -218,7 +218,8 @@ class PredictionPipeline:
         self.week = week
         self.season = season
         self.player_usage = self._calculate_player_usage()
-        self.defense_vuln = self._calculate_defense_vulnerabilities()
+        self.defense_vuln_full = self._calculate_defense_vulnerabilities()
+        self.defense_vuln_rate = self.defense_vuln_full[['defteam', 'position', 'def_vuln_rate']]
         self.depth_charts = self._process_depth_charts()
 
     def run(self):
@@ -240,31 +241,18 @@ class PredictionPipeline:
     def _merge_prediction_features(self, base_df, latest_usage):
         df = pd.merge(base_df, latest_usage, left_on='gsis_id', right_on='player_id', how='left')
         latest_depths = self.depth_charts.sort_values('week').groupby('gsis_id').last().reset_index()
-        df = pd.merge(df, latest_depths[['gsis_id', 'depth_multiplier']], on='gsis_id', how='left')
+        df = pd.merge(df, latest_depths[['gsis_id', 'depth_team', 'depth_multiplier']], on='gsis_id', how='left') # --- MODIFIED: Added depth_team
         df['depth_multiplier'].fillna(0.6, inplace=True)
+        df['depth_team'].fillna('N/A', inplace=True)
         schedule = self.all_data['schedule'][['game_id', 'home_team', 'away_team']]
         df = df.merge(schedule, on='game_id')
         df['opponent'] = np.where(df['team'] == df['home_team'], df['away_team'], df['home_team'])
-        df = pd.merge(df, self.defense_vuln, left_on=['opponent', 'position'], right_on=['defteam', 'position'], how='left')
+        df = pd.merge(df, self.defense_vuln_rate, left_on=['opponent', 'position'], right_on=['defteam', 'position'], how='left')
         df['def_vuln_rate'].fillna(df['def_vuln_rate'].mean(), inplace=True)
         return df
     
     def _calculate_player_usage(self):
-        pbp = self.all_data['pbp']
-        usage_plays = pbp[(pbp['play_type'].isin(['run', 'pass'])) & (pbp['rusher_player_id'].notna() | pbp['receiver_player_id'].notna())]
-        usage_df = pd.melt(usage_plays, id_vars=['game_id', 'season', 'week', 'posteam', 'yardline_100'], value_vars=['rusher_player_id', 'receiver_player_id'], value_name='player_id').dropna()
-        usage_df['is_touch'] = 1
-        usage_df['is_rz_touch'] = np.where(usage_df['yardline_100'] <= 20, 1, 0)
-        weekly_stats = usage_df.groupby(['player_id', 'game_id', 'season', 'week']).agg(touches=('is_touch', 'sum'), rz_touches=('is_rz_touch', 'sum')).reset_index()
-        team_totals = weekly_stats.groupby('game_id').agg(team_touches=('touches', 'sum'), team_rz_touches=('rz_touches', 'sum')).reset_index()
-        weekly_stats = weekly_stats.merge(team_totals, on='game_id')
-        weekly_stats['opp_share'] = weekly_stats['touches'] / weekly_stats['team_touches']
-        weekly_stats['rz_share'] = weekly_stats['rz_touches'] / weekly_stats['team_rz_touches']
-        weekly_stats.sort_values(by=['player_id', 'season', 'week'], inplace=True)
-        grouped = weekly_stats.groupby('player_id')
-        weekly_stats['ewma_opp_share'] = grouped['opp_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
-        weekly_stats['ewma_rz_share'] = grouped['rz_share'].transform(lambda x: x.ewm(span=EWMA_SPAN, adjust=False).mean())
-        return weekly_stats
+        return FeatureEngineeringEngine(self.all_data)._calculate_player_usage()
     
     def _calculate_defense_vulnerabilities(self):
         return FeatureEngineeringEngine(self.all_data)._calculate_defense_vulnerabilities()
@@ -323,20 +311,23 @@ def run_training_process():
     st.info("You can now navigate to the 'Prediction Dashboard'.")
 
 # --- UI Helper & Display Functions ---
-def generate_justification(player_row):
-    justifications = []
-    rz_share = player_row['ewma_rz_share']
-    if rz_share > 0.35: justifications.append(f"**Elite Red Zone Usage** ({rz_share:.1%})")
-    elif rz_share > 0.20: justifications.append(f"High Red Zone Share ({rz_share:.1%})")
-    depth = player_row['depth_multiplier']
-    if depth >= 1.2: justifications.append("Primary RB1")
-    elif depth >= 1.15: justifications.append("Primary WR1")
-    elif depth >= 1.1: justifications.append("Primary TE1")
-    vuln = player_row['def_vuln_rate']
-    if vuln > 0.40: justifications.append(f"**Favorable Matchup** (vs. {player_row['opponent']} - {vuln:.0%} of TDs allowed to {player_row['position']}s)")
-    elif vuln > 0.30: justifications.append(f"Good Matchup (vs. {player_row['opponent']})")
-    if not justifications: return "Consistent overall usage."
-    return ", ".join(justifications)
+@st.cache_data
+def get_defensive_ranks(defense_profiles):
+    """ --- NEW: Calculates defensive ranks for each position. --- """
+    if defense_profiles.empty:
+        return pd.DataFrame()
+    
+    # Calculate TDs allowed per game to normalize
+    pbp_data = load_all_data()['pbp']
+    games_played = pbp_data.groupby('defteam')['game_id'].nunique().reset_index(name='games_played')
+    
+    defense_tds = defense_profiles.groupby(['defteam', 'position'])['count'].sum().reset_index()
+    defense_tds = pd.merge(defense_tds, games_played, on='defteam', how='left')
+    defense_tds['tds_allowed_pg'] = defense_tds['count'] / defense_tds['games_played']
+    
+    # Rank teams (higher rank is worse)
+    defense_tds['rank'] = defense_tds.groupby('position')['tds_allowed_pg'].rank(method='dense', ascending=False)
+    return defense_tds
 
 @st.cache_resource
 def get_model():
@@ -377,12 +368,50 @@ def display_dashboard():
         probabilities = model.predict_proba(X_predict)[:, 1]
         prediction_features_df['raw_probability'] = probabilities
         games = prediction_features_df[['game_id', 'home_team', 'away_team']].drop_duplicates()
+        
+        defense_profiles = pipeline.defense_vuln_full
+        defensive_ranks = get_defensive_ranks(defense_profiles)
 
         for _, game in games.iterrows():
             game_df = prediction_features_df[prediction_features_df['game_id'] == game['game_id']]
             st.markdown("---")
-            st.header(f"{game['away_team']} @ {game['home_team']}")
-            col1, col2 = st.columns(2)
+            
+            # --- MODIFIED: Added Vegas Odds to Game Header ---
+            game_info = schedule[schedule['game_id'] == game['game_id']].iloc[0]
+            spread = f"Spread: {game_info.get('spread_line', 'N/A')}"
+            total = f"O/U: {game_info.get('total_line', 'N/A')}"
+            
+            header_cols = st.columns([3, 1, 1])
+            with header_cols[0]:
+                st.header(f"{game['away_team']} @ {game['home_team']}")
+            with header_cols[1]:
+                st.markdown(f"**{spread}**")
+            with header_cols[2]:
+                st.markdown(f"**{total}**")
+
+
+            with st.expander("View Defensive Profiles"):
+                d_col1, d_col2 = st.columns(2)
+                away_def_data = defense_profiles[defense_profiles['defteam'] == game['away_team']]
+                if not away_def_data.empty:
+                    with d_col1:
+                        st.markdown(f"**{game['away_team']} Defense**")
+                        fig_away = go.Figure(data=[go.Pie(labels=away_def_data['position'], values=away_def_data['count'], hole=.3)])
+                        fig_away.update_layout(title_text='TDs Allowed by Position', height=350, margin=dict(t=50, b=10), showlegend=True)
+                        st.plotly_chart(fig_away, use_container_width=True)
+
+                home_def_data = defense_profiles[defense_profiles['defteam'] == game['home_team']]
+                if not home_def_data.empty:
+                    with d_col2:
+                        st.markdown(f"**{game['home_team']} Defense**")
+                        fig_home = go.Figure(data=[go.Pie(labels=home_def_data['position'], values=home_def_data['count'], hole=.3)])
+                        fig_home.update_layout(title_text='TDs Allowed by Position', height=350, margin=dict(t=50, b=10), showlegend=True)
+                        st.plotly_chart(fig_home, use_container_width=True)
+
+                if away_def_data.empty and home_def_data.empty:
+                    st.info("No defensive touchdown data available for this matchup.")
+            
+            p_col1, p_col2 = st.columns(2)
             
             for i, team_name in enumerate([game['away_team'], game['home_team']]):
                 team_df = game_df[game_df['team'] == team_name].copy()
@@ -390,16 +419,29 @@ def display_dashboard():
                 team_total_prob = team_df['raw_probability'].sum()
                 team_df['probability'] = (team_df['raw_probability'] / team_total_prob) * 100 if team_total_prob > 0 else 0
                 top_players = team_df.sort_values('probability', ascending=False).head(5)
-                container = col1 if i == 0 else col2
+                container = p_col1 if i == 0 else p_col2
                 with container:
                     st.subheader(team_name)
-                    fig = px.bar(top_players, x='probability', y='full_name', orientation='h', labels={'probability': 'Probability (%)', 'full_name': ''}, text='probability')
-                    fig.update_layout(yaxis={'categoryorder':'total ascending'}, showlegend=False, height=250, margin=dict(l=10, r=10, t=10, b=10))
-                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside', marker_color='#1f77b4')
-                    st.plotly_chart(fig, use_container_width=True)
                     for _, player in top_players.iterrows():
                         with st.expander(f"{player['full_name']} ({player['position']}) - {player['probability']:.1f}%"):
-                            st.markdown(f"**Key Factors:** {generate_justification(player)}")
+                            
+                            # --- NEW: Enhanced Player Profile Section ---
+                            st.markdown("##### Player Profile")
+                            profile_cols = st.columns(4)
+                            
+                            # Defensive Rank
+                            rank_info = defensive_ranks[(defensive_ranks['defteam'] == player['opponent']) & (defensive_ranks['position'] == player['position'])]
+                            def_rank = int(rank_info['rank'].iloc[0]) if not rank_info.empty else 'N/A'
+                            profile_cols[0].metric("Opponent Rank vs Pos", f"#{def_rank}")
+
+                            # Depth Chart
+                            profile_cols[1].metric("Depth Chart", player.get('depth_team', 'N/A'))
+                            
+                            # Key Metrics
+                            profile_cols[2].metric("Red Zone Share (EWMA)", f"{player.get('ewma_rz_share', 0):.1%}")
+                            profile_cols[3].metric("Opp Share (EWMA)", f"{player.get('ewma_opp_share', 0):.1%}")
+
+                            # --- EXISTING CHARTS & DATA ---
                             player_history = pipeline.player_usage[pipeline.player_usage['player_id'] == player['gsis_id']].sort_values(by=['season', 'week']).tail(8)
                             if not player_history.empty:
                                 player_history['week_label'] = 'Wk ' + player_history['week'].astype(str)
@@ -409,26 +451,14 @@ def display_dashboard():
                                 fig_trends.update_layout(title="Recent Usage Trend", xaxis_title="Game Week", yaxis_title="Share %", height=300, margin=dict(l=20, r=20, t=40, b=20), legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01))
                                 st.plotly_chart(fig_trends, use_container_width=True)
                                 
-                                # --- THIS IS THE CORRECTED/ADDED BLOCK ---
                                 st.markdown("##### Recent Game Log")
                                 table_data = player_history[['week', 'touches', 'rz_touches', 'opp_share', 'rz_share']].copy()
-                                table_data.rename(columns={
-                                    'week': 'Week',
-                                    'touches': 'Touches',
-                                    'rz_touches': 'RZ Touches',
-                                    'opp_share': 'Opp. Share',
-                                    'rz_share': 'RZ Share'
-                                }, inplace=True)
+                                table_data.rename(columns={'week': 'Wk','touches': 'Tch','rz_touches': 'RZ Tch','opp_share': 'Opp %','rz_share': 'RZ %'}, inplace=True)
                                 st.dataframe(
-                                    table_data.style.format({
-                                        "Opp. Share": "{:.3f}",
-                                        "RZ Share": "{:.3f}"
-                                    }),
+                                    table_data.style.format({"Opp %": "{:.1%}", "RZ %": "{:.1%}"}),
                                     use_container_width=True,
                                     hide_index=True
                                 )
-                                # --- END OF CORRECTED/ADDED BLOCK ---
-
 
 def display_model_management():
     st.title("📑 Model Management")
@@ -460,3 +490,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
