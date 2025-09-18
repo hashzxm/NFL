@@ -1,2 +1,5 @@
 r-base
 libcurl4-openssl-dev
+libsodium-dev
+libxml2-dev
+libssl-dev
